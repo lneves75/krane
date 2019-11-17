@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: my-app:1.0
+        env:
+        - name: DATASOURCE
+          valueFrom:
+            secretKeyRef:
+              name: my-app-secret-1
+              key: DATASOURCE
+        - name: HOST
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config-1
+              key: HOST
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 300m
+            memory: 200M
+          requests:
+            cpu: 25m
+            memory: 80M
+        volumeMounts:
+          - name: config-vol
+            mountPath: /app/config/config.cfg
+            readOnly: true
+          - name: secret-vol
+            mountPath: /app/config/secret.cfg
+            readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /health_check
+            port: http
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health_check
+            port: http
+          initialDelaySeconds: 90
+          timeoutSeconds: 5
+      volumes:
+        - name: config-vol
+          configMap: 
+            name: my-config-2
+        - name: secret-vol
+          secret: 
+            secretName: my-secret-2

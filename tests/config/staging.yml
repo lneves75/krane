@@ -1,0 +1,18 @@
+# Users
+ClusterAdmins:
+  - user1
+  - user2
+Fleet: 
+  Name: staging
+  Domain: staging.mydomain.net
+  DefaultImageTag: latest
+Nginx:
+  Replicas: 1
+  ImageTag: "1.17"
+Service2:
+  FeatureEnabled: true
+Secrets:
+  Service1:
+    Datasource: postgres://user:password@staging/service1
+  Service2:
+    Datasource: postgres://user:password@staging/service2

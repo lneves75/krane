@@ -1,0 +1,43 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: service1
+spec:
+  replicas: {{ default 1 .Service1.Replicas }}
+  selector:
+    matchLabels:
+      app: service1
+  progressDeadlineSeconds: 300
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      labels:
+        app: service1
+    spec:
+      containers:
+      - name: service1
+        image: {{ .Globals.ImageRegistry }}/service1:{{ coalesce .Service2.ImageTag .Fleet.DefaultImageTag "latest" }}
+        env:
+        - name: DATASOURCE
+          valueFrom:
+            secretKeyRef:
+              name: service1
+              key: DATASOURCE
+        - name: TOTAL_THREADS
+          valueFrom:
+            configMapKeyRef:
+              name: service1
+              key: total_threads
+        - name: ENVIRONMENT_DOMAIN
+          value: {{ .Fleet.Domain }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1800M
+          requests:
+            cpu: 250m
+            memory: 800M

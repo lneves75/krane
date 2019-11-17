@@ -1,0 +1,7 @@
+Nginx:
+  ImageTag: "1.9.0"
+Service2:
+  ReadOnly: true
+Secrets:
+  Service2:
+    Datasource: postgres://read-only-user:password123@server/service2

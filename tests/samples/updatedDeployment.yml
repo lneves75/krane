@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: my-app
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: my-app
+    template:
+        metadata:
+            labels:
+                app: my-app
+        spec:
+            containers:
+              - env:
+                  - name: DATASOURCE
+                    valueFrom:
+                        secretKeyRef:
+                            key: DATASOURCE
+                            name: some-other-secret-1
+                  - name: HOST
+                    valueFrom:
+                        configMapKeyRef:
+                            key: HOST
+                            name: some-other-config-1
+                image: my-app:1.0
+                livenessProbe:
+                    httpGet:
+                        path: /health_check
+                        port: http
+                    initialDelaySeconds: 90
+                    timeoutSeconds: 5
+                name: my-app
+                ports:
+                  - containerPort: 8080
+                    name: http
+                    protocol: TCP
+                readinessProbe:
+                    httpGet:
+                        path: /health_check
+                        port: http
+                    initialDelaySeconds: 60
+                    timeoutSeconds: 5
+                resources:
+                    limits:
+                        cpu: 300m
+                        memory: 200M
+                    requests:
+                        cpu: 25m
+                        memory: 80M
+                volumeMounts:
+                  - mountPath: /app/config/config.cfg
+                    name: config-vol
+                    readOnly: true
+                  - mountPath: /app/config/secret.cfg
+                    name: secret-vol
+                    readOnly: true
+            volumes:
+              - configMap:
+                    name: some-other-config-2
+                name: config-vol
+              - name: secret-vol
+                secret:
+                    secretName: some-other-secret-2

@@ -1,0 +1,18 @@
+ClusterAdmins:
+  - user1
+Fleet: 
+  Name: production
+  Domain: mydomain.net
+  DefaultImageTag: production
+Nginx:
+  Replicas: 2
+  ImageTag: "1.12"
+Service2:
+  Replicas: 1
+  FeatureEnabled: false
+  ReadOnly: false
+Secrets:
+  Service1:
+    Datasource: postgres://user:password@prod/service1
+  Service2:
+    Datasource: postgres://user:password@prod/service2

@@ -1,0 +1,6 @@
+Nginx:
+  Replicas: 10
+Service2:
+  FeatureEnabled: true
+Exclude:
+  - service1

@@ -1,0 +1,12 @@
+fleets:
+  - name: staging
+    clusters:
+      - name: staging
+  - name: production
+    clusters:
+      - name: prod01
+      - name: prod02
+
+globals:
+  Region: eu-central-1
+  ImageRegistry: 123456789.dkr.ecr.blablabla/acme

@@ -1,0 +1,65 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: service2
+spec:
+  replicas: {{ default 1 .Service2.Replicas }}
+  selector:
+    matchLabels:
+      app: service2
+  progressDeadlineSeconds: 300
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      labels:
+        app: service2
+    spec:
+      containers:
+      - name: service2
+        image: {{ .Globals.ImageRegistry }}/service2:{{ coalesce .Service1.ImageTag .Fleet.DefaultImageTag "latest" }}
+        env:
+        - name: DATASOURCE
+          valueFrom:
+            secretKeyRef:
+              name: service2
+              key: DATASOURCE
+        - name: READ_ONLY
+          value: {{ .Service2.ReadOnly }}
+        - name: ENVIRONMENT_DOMAIN
+          value: {{ .Fleet.Domain }}
+        - name: FEATURE_ENABLED
+          value: {{ .Service2.FeatureEnabled }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 300m
+            memory: 200M
+          requests:
+            cpu: 25m
+            memory: 80M
+        {{ if .Service2.FeatureEnabled -}}
+        volumeMounts:
+          - name: feature-vol
+            mountPath: /app/config/feature.cfg
+            readOnly: true
+        {{ end -}}
+        readinessProbe:
+          httpGet:
+            path: /health_check
+            port: http
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health_check
+            port: http
+          initialDelaySeconds: 90
+          timeoutSeconds: 5
+      {{ if .Service2.FeatureEnabled -}}
+      volumes:
+        - name: feature-vol
+          configMap: service2-feature-config
+      {{ end -}}
